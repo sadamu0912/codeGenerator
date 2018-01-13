@@ -36,4 +36,141 @@
     </sql>
 
 #end
+
+  <!-- 获取所有记录-->	
+<select id="getAllRecords" resultMap="BaseResultMap">
+	select
+ 		<include refid="Base_Column_List"/>
+ 		from ${table.name}
+ 	</select>
+ 	
+ 	
+  <!-- 获取记录总数-->	
+ <select id="getRecordsCount" parameterType="HashMap" resultType="Integer">
+	select count(*) from ${table.name}
+	where 1=1
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})##生成普通字段
+	<if test="${field.propertyName} !=null">
+		and ${field.name} =#{${field.propertyName}}
+	</if>
+#end
+#end
+ 	</select>
+ 	 <!-- 根据条件查询数据-->	
+ 	<select id="getListByCondition" parameterType="HashMap" resultMap="BaseResultMap">
+ 	select
+ 		<include refid="Base_Column_List"/>
+ 		from ${table.name}
+ 		where 1=1
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})##生成普通字段
+	<if test="${field.propertyName} !=null">
+		and ${field.name} =#{${field.propertyName}}
+	</if>
+#end
+#end
+<if test="startTime !=null and endTime !=null">
+		and create_time between #{startTime} and #{endTime}
+	</if>
+	order by create_time desc
+ 	</select>
+ 	 <!-- 根据条件查询数据   有分页数据-->	
+ <select id="getListwithPageInfo" parameterType="HashMap" resultMap="BaseResultMap">
+ 	select
+ 		<include refid="Base_Column_List"/>
+ 		from ${table.name}
+ 		where 1=1
+ #foreach($field in ${table.fields})	
+#if(!${field.keyFlag})##生成普通字段
+	<if test="${field.propertyName} !=null">
+		and ${field.name} =#{${field.propertyName}}
+	</if>
+#end
+#end
+	<if test="startTime !=null and endTime !=null">
+		and create_time between #{startTime} and #{endTime}
+	</if>
+	order by create_time desc
+	<if test="pageInfo!=null">
+		limit #{pageInfo.start},#{pageInfo.offset}
+	</if>
+ </select>	
+  <!-- 新增记录-->	
+ <insert id="addRecord" parameterType="HashMap">
+ 	insert into ${table.name}
+ 		<trim prefix="(" suffix=")" suffixOverrides=",">
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})##生成普通字段
+	<if test="${field.propertyName} !=null">
+		 ${field.name},
+	</if>
+#end
+#end	
+ 		</trim>
+ 		<trim prefix="values (" suffix=")" suffixOverrides=",">
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})##生成普通字段
+	<if test="${field.propertyName} !=null">
+		#{${field.propertyName}},
+	</if>
+#end
+#end
+ 		</trim>
+ </insert>
+   <!-- 更新记录 根据id-->	
+ <update id="updateRecordById" parameterType="HashMap">
+ 	update ${table.name}
+ 	<set>
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})##生成普通字段
+	<if test="${field.propertyName} !=null">
+		 ${field.name} =#{${field.propertyName}},
+	</if>
+#end
+#end 		
+ 	</set>
+ 	where 1=1 
+	and ${table.name}_id =#{${table.name}Id}	
+ </update>
+    <!--  根据id 批量更新记录-->	
+  <update id="updateRecordsByIds" parameterType="HashMap">
+ 	update ${table.name}
+ 	<set>
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})##生成普通字段
+	<if test="${field.propertyName} !=null">
+		 ${field.name} =#{${field.propertyName}},
+	</if>
+#end
+#end 		
+ 	</set>
+ 	where   ${table.name}_id in 
+	<foreach item="recordId" index="index" collection="${table.name}Ids" open="(" separator="," close=")">
+		#{${table.name}Id}
+	</foreach>	
+ </update>
+     <!--  批量新增记录   test==null 的地方需要  当integer的时候把'',换成0,  时间的换成 now(),-->	
+ <insert id="addRecordsBatch" parameterType="HashMap" useGeneratedKeys="true">
+ 	<selectKey resultType="int" keyProperty="increment_id" order="AFTER">
+ 		SELECT LAST_INSERT_ID()	
+ 	</selectKey>
+ 	insert into ${table.name}
+ 		(
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})
+		 ${field.name} ,
+#end
+#end 
+	) values
+	<foreach collection="list" item ="item" index ="index" separator=",">	
+	(
+#foreach($field in ${table.fields})	
+#if(!${field.keyFlag})
+<if test="${field.propertyName} !=null">${field.name} =#{${field.propertyName}},</if><if test="${field.propertyName} ==null">'',/if>		
+#end
+#end		
+	)
+	</foreach>
+ </insert>
 </mapper>
