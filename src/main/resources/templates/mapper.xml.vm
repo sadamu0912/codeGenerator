@@ -167,7 +167,7 @@
 	(
 #foreach($field in ${table.fields})	
 #if(!${field.keyFlag})
-<if test="${field.propertyName} !=null">${field.name} =#{${field.propertyName}},</if><if test="${field.propertyName} ==null">'',/if>		
+<if test="${field.propertyName} !=null">${field.name} =#{${field.propertyName}},</if><if test="${field.propertyName} ==null">'',</if>		
 #end
 #end		
 	)
