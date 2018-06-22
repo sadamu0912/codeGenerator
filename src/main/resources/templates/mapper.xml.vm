@@ -15,7 +15,7 @@
 		<id column="${field.name}" property="${field.propertyName}" />
 #end
 #end
-#foreach($field in ${table.commonFields})##生成公共字段
+	#foreach($field in ${table.commonFields})##生成公共字段
 	<result column="${field.name}" property="${field.propertyName}" />
 #end
 #foreach($field in ${table.fields})
